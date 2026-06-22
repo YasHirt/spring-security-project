@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: estudoSpringSecurity
+
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/seguranca"
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      generate-ddl: false
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+server:
+  port: 8081
