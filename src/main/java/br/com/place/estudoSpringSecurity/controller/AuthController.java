@@ -1,5 +1,6 @@
 package br.com.place.estudoSpringSecurity.controller;
 
+import br.com.place.estudoSpringSecurity.config.TokenConfig;
 import br.com.place.estudoSpringSecurity.dto.request.LoginRequest;
 import br.com.place.estudoSpringSecurity.dto.request.RegisterUserRequest;
 import br.com.place.estudoSpringSecurity.dto.response.LoginResponse;
@@ -23,19 +24,25 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final TokenConfig tokenConfig;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, TokenConfig tokenConfig) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.tokenConfig = tokenConfig;
     }
 
     @PostMapping("/login") //essa dto retorna um token
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest)
     {
+        //cria um envelope
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
+        //o authenticationManager abre o AuthConfig
         Authentication authentication = authenticationManager.authenticate(userAndPass);
-        return null;
+        User user = (User) authentication.getPrincipal();
+        String token = tokenConfig.generateToken(user);
+        return ResponseEntity.ok().body(new LoginResponse(token));
     }
     @PostMapping("/register")
     public ResponseEntity<RegisterUserResponse> register(@Valid @RequestBody RegisterUserRequest registerUserRequest)
