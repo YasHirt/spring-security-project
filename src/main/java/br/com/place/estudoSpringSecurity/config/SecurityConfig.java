@@ -13,10 +13,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration //diz ao spring que essa classe é uma fábica de beans, spring vai buscar métodos com @Bean
 @EnableWebSecurity //"Desative as configurações padrão de segurança (aquela senha aleatória que gera no console) porque eu vou ditar as regras a partir de agora nesta classe".
 public class SecurityConfig {
+    private final SecurityFilter securityFilter;
+
+    public SecurityConfig(SecurityFilter securityFilter) {
+        this.securityFilter = securityFilter;
+    }
 
     @Bean
     //O securityFilterChain é o jeito que o spring vai proteger o app
@@ -47,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .anyRequest().authenticated())
+                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
     @Bean

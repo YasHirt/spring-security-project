@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 //Stereotype Component Scanning
 @RestController
 @RequestMapping("/auth")
@@ -33,16 +34,22 @@ public class AuthController {
         this.tokenConfig = tokenConfig;
     }
 
+    //E se o user não for encontrado?
     @PostMapping("/login") //essa dto retorna um token
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest)
     {
+
+
+            UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
+            //o authenticationManager abre o AuthConfig
+            Authentication authentication = authenticationManager.authenticate(userAndPass);
+            User user = (User) authentication.getPrincipal();
+            String token = tokenConfig.generateToken(user);
+            return ResponseEntity.ok().body(new LoginResponse(token));
+
         //cria um envelope
-        UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(loginRequest.email(), loginRequest.password());
-        //o authenticationManager abre o AuthConfig
-        Authentication authentication = authenticationManager.authenticate(userAndPass);
-        User user = (User) authentication.getPrincipal();
-        String token = tokenConfig.generateToken(user);
-        return ResponseEntity.ok().body(new LoginResponse(token));
+
+
     }
     @PostMapping("/register")
     public ResponseEntity<RegisterUserResponse> register(@Valid @RequestBody RegisterUserRequest registerUserRequest)
